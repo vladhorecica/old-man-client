@@ -5,19 +5,17 @@ You can follow the changes [here](CHANGELOG.md).
 
 ### Instalation
 * Via `Makefile` simply run
-
-
+```
  	make install 
- 	
+```
 
 * Via `npm` run the following commands
 
-
-
+```
 	npm install
 	cp config.js.dist config.js
 	npm run dev-build
-	
+```
 
 
 _Note: make sure you already have `node` and `npm` installed on your environment_
