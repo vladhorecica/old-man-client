@@ -3,7 +3,8 @@ import {
     SET_USER_ACTION,
     SET_USERS_ACTION,
     REMOVE_USER_ACTION,
-    DEFAULT_LIMIT
+    DEFAULT_LIMIT,
+    LOGOUT_ACTION
 } from '../actions/userAction';
 
 const initialUserState = {
@@ -50,6 +51,14 @@ export default (state = initialUserState, action) => {
                     total: action.total
                 },
                 users: [...state.users, ...action.data]
+            };
+
+        case LOGOUT_ACTION:
+            return {
+                ...state,
+                auth: {
+                    me: undefined
+                }
             };
 
         default:

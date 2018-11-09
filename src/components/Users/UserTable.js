@@ -6,7 +6,9 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { getAllUsers } from '../../actions/userAction';
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+    auth: state.userReducer.auth
+});
 
 const mapDispatchToProps = dispatch => ({});
 
@@ -15,6 +17,7 @@ class UserTable extends Component {
         super(props);
 
         this.state = {
+            selected: '',
             columnDefs: [
                 { headerName: "ID", field: "id", width: 70, cellRenderer: "loadingRenderer" },
                 { headerName: "Username", field: "username", width: 200 },
@@ -39,19 +42,19 @@ class UserTable extends Component {
         };
     }
 
-    onGridReady(params) {
+    onGridReady(params, auth) {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
 
         const updateData = () => {
-            var dataSource = {
+            const dataSource = {
                 rowCount: null,
                 getRows: async (params) => {
                     console.log("asking for " + params.startRow + " to " + params.endRow);
 
-                    const users = await getAllUsers(params.startRow, params.endRow);
+                    const users = await getAllUsers(params.startRow, params.endRow, auth);
                     if (users) {
-                        params.successCallback(users);
+                        params.successCallback(users.data, users.meta.total);
                     }
 
                 }
@@ -62,9 +65,31 @@ class UserTable extends Component {
         updateData();
     }
 
+    onSelectionChanged(updateSelected) {
+        const selectedRows = this.gridApi.getSelectedRows();
+        let selectedRowsString = "";
+
+        selectedRows.forEach(function(selectedRow, index) {
+            if (index !== 0) {
+                selectedRowsString += ", ";
+            }
+            selectedRowsString += `${selectedRow.firstName} ${selectedRow.lastName}`;
+        });
+
+        updateSelected(selectedRowsString);
+    }
+
+    updateSelected = (selected) => {
+        this.setState({ selected });
+    };
+
+    renderSelectedText() {
+        return (this.state.selected) ? <div style={{display: 'block', color: '#F50757'}}>{this.state.selected}</div> : '';
+    }
+
     render() {
         return (
-            <div style={{height: '500px', width: '100%'}}>
+            <div style={{height: '500px', width: '30%'}}>
                 <div id="myGrid" className="ag-theme-balham"
                      style={{
                          boxSizing: "border-box",
@@ -72,6 +97,7 @@ class UserTable extends Component {
                          width: "100%"
                      }}
                 >
+                    {this.renderSelectedText()}
                     <AgGridReact
                         columnDefs={this.state.columnDefs}
                         components={this.state.components}
@@ -86,7 +112,8 @@ class UserTable extends Component {
                         cacheBlockSize={this.state.cacheBlockSize}
                         maxConcurrentDatasourceRequests={this.state.maxConcurrentDatasourceRequests}
                         maxBlocksInCache={this.state.maxBlocksInCache}
-                        onGridReady={this.onGridReady}
+                        onGridReady={(params) => this.onGridReady(params, this.props.auth)}
+                        onSelectionChanged={() => this.onSelectionChanged(this.updateSelected)}
                     />
                 </div>
             </div>

@@ -29,6 +29,7 @@ module.exports = {
         contentBase: path.join(__dirname, "public/"),
         port: 8000,
         publicPath: appConfig.client.url + "dist/",
+        historyApiFallback: true,
         hotOnly: true
     },
     plugins: [new webpack.HotModuleReplacementPlugin()]

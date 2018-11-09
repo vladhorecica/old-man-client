@@ -6,12 +6,11 @@ const service = 'users/';
 
 export async function loadMe(data) {
     return await axios.post(buildUrl(service, 'authenticate'), data)
-        .then(response => response.data)
-        .catch(error => console.error(error));
+        .then(response => response.data);
 }
 
-export async function createUser(data, auth) {
-    return await axios.post(buildUrl(service, ''), data, getConfig(auth))
+export async function createUser(data) {
+    return await axios.post(buildUrl(service, ''), data)
         .then(response => response.data.data)
         .catch(error => console.error(error));
 }
@@ -22,8 +21,8 @@ export async function removeUser(id, auth) {
         .catch(error => console.error(error));
 }
 
-export async function loadUsers(query) {
-    return await axios.get(buildUrl(service, '', { query }))
+export async function loadUsers(query, auth) {
+    return await axios.get(buildUrl(service, '', { query }), getConfig(auth))
         .then(response => response.data)
         .catch(error => console.error(error));
 }

@@ -1,6 +1,7 @@
 import * as UserService from '../services/UserService';
 
 export const ME_ACTION = "@@ME_ACTION";
+export const LOGOUT_ACTION = "@@LOGOUT_ACTION";
 export const SET_USER_ACTION = "@@SET_USER_ACTION";
 export const SET_USERS_ACTION = "@@SET_USERS_ACTION";
 export const REMOVE_USER_ACTION = "@@REMOVE_USER_ACTION";
@@ -8,9 +9,26 @@ export const REMOVE_USER_ACTION = "@@REMOVE_USER_ACTION";
 
 export const DEFAULT_LIMIT = 50;
 
-export const authAction = (username, password) => dispatch => {
+export const authAction = (username, password, callbackObj = null) => dispatch => {
     UserService.loadMe({username, password})
-        .then((user) => dispatch(setMe(user)));
+        .then((user) => {
+            if (callbackObj) {
+                callbackObj.onSuccess();
+            }
+
+            dispatch(setMe(user));
+        })
+        .catch(() => {
+            if (callbackObj) {
+                callbackObj.onFailure();
+            }
+        });
+};
+
+export const logoutAction = () => dispatch => {
+    dispatch({
+        type: LOGOUT_ACTION
+    });
 };
 
 export const setMe = (me) => dispatch => {
@@ -44,12 +62,15 @@ export const setUsersData = (total, current, data) => dispatch => {
 };
 
 
-export const createUserAction = (data) => {
+export const createUserAction = (data, callbackObj) => {
     return (dispatch, getState) => {
-        const auth = getState().userReducer.auth;
+        UserService.createUser(data)
+            .then((user) => {
+                dispatch(setUser(user));
 
-        UserService.createUser(data, auth)
-            .then(user => dispatch(setUser(user)));
+                if (callbackObj)
+                    callbackObj.onSuccess();
+            });
     }
 };
 
@@ -83,7 +104,7 @@ export const loadUsersAction = () => {
     }
 };
 
-export const getAllUsers = (offset, limit) => {
-    return UserService.loadUsers({offset, limit}, null)
-        .then(response => response.data);
+export const getAllUsers = (offset, limit, auth) => {
+    return UserService.loadUsers({offset, limit}, auth)
+        .then(response => response);
 };
